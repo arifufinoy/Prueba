@@ -1,0 +1,8 @@
+[
+  { "codigo": "MED-000001", "direccion": "Av. Amazonas N24-120", "sector": "Norte", "numeroCuenta": "CTA-100001", "estado": "normal", "ultimaLectura": 100, "fechaUltimaLectura": "2026-09-25T14:00:00.000Z", "consumoPromedioMensual": 20 },
+  { "codigo": "MED-000002", "direccion": "Calle García Moreno S2-40", "sector": "Centro", "numeroCuenta": "CTA-100002", "estado": "normal", "ultimaLectura": 200, "fechaUltimaLectura": "2026-09-25T14:00:00.000Z", "consumoPromedioMensual": 10 },
+  { "codigo": "MED-000003", "direccion": "Pasaje El Recreo S12-30", "sector": "Sur", "numeroCuenta": "CTA-100003", "estado": "inaccesible", "ultimaLectura": 300, "fechaUltimaLectura": "2026-09-25T14:00:00.000Z", "consumoPromedioMensual": 15 },
+  { "codigo": "MED-000004", "direccion": "Av. Interoceánica E4-65", "sector": "Valles", "numeroCuenta": "CTA-100004", "estado": "dañado", "ultimaLectura": 400, "fechaUltimaLectura": "2026-09-25T14:00:00.000Z", "consumoPromedioMensual": 18 },
+  { "codigo": "MED-000005", "direccion": "Calle Los Eucaliptos Oe3-18", "sector": "Occidente", "numeroCuenta": "CTA-100005", "estado": "normal", "ultimaLectura": 500, "fechaUltimaLectura": "2026-09-25T14:00:00.000Z", "consumoPromedioMensual": 25 },
+  { "codigo": "MED-000006", "direccion": "Av. Maldonado S18-50", "sector": "Sur", "numeroCuenta": "CTA-100006", "estado": "normal", "ultimaLectura": 600, "fechaUltimaLectura": "2026-09-25T14:00:00.000Z", "consumoPromedioMensual": 20 }
+]

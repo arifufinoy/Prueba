@@ -1,0 +1,3 @@
+[
+  { "clientId": "demo-existente-2026-10-med000006", "codigoMedidor": "MED-000006", "codigoEmpleado": "EMP-001", "periodo": "2026-10", "fechaRegistro": "2026-10-01T14:00:00.000Z", "estadoMedidor": "normal", "lecturaActual": 620, "lecturaAnterior": 600, "consumoCalculado": 20, "consumoAnomalo": false, "confirmacionAnomalia": false, "motivoInaccesible": null, "descripcionDanio": null, "fotoUrl": null, "fechaVisita": "2026-10-01", "tieneFoto": false }
+]

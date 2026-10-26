@@ -1,38 +1,40 @@
 {
   "expo": {
-    "name": "Prueba",
+    "name": "EPMAPS · Lecturas",
     "slug": "Prueba",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "prueba",
-    "userInterfaceStyle": "automatic",
-    "ios": {
-      "icon": "./assets/expo.icon"
-    },
+    "icon": "./assets/images/epmaps-icon.png",
+    "scheme": "epmaps",
+    "userInterfaceStyle": "light",
+    "ios": { "bundleIdentifier": "ec.edu.epmaps.lecturas" },
     "android": {
+      "package": "ec.edu.epmaps.lecturas",
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#E8EFF3",
+        "foregroundImage": "./assets/images/epmaps-icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/epmaps-icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#E8EFF3",
+          "image": "./assets/images/epmaps-icon.png",
+          "imageWidth": 130
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-secure-store",
+      "@react-native-community/datetimepicker",
+      ["expo-image-picker", { "cameraPermission": "EPMAPS necesita la cámara para documentar el medidor y conservar evidencia de la visita.", "microphonePermission": false, "photosPermission": false }]
     ],
     "experiments": {
       "typedRoutes": true,
