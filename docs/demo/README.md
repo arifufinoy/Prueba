@@ -1,5 +1,7 @@
 # Carga manual no destructiva en MockAPI
 
+Este procedimiento es únicamente **manual** para quien necesite poblar el catastro de prueba desde el panel. La app no ofrece diagnóstico ni carga de ejemplos; permite enviar visitas aunque `/medidores` esté vacío, sin inventar detalles de medidores.
+
 Inspección inicial real (2026-10-26): `GET /medidores` y `GET /lecturas` devolvieron `[]`. No se enviaron POST durante el desarrollo. No es posible deducir el esquema configurado desde una colección vacía.
 
 1. En el panel del proyecto MockAPI configura recursos raíz `medidores` y `lecturas` si faltan (plural exacto; sin `/api/v1` salvo que cambies la URL base).
@@ -17,7 +19,7 @@ Los archivos intencionadamente no incluyen `id`: son cuerpos de creación con el
 | MED-000002 | Actual 231 → consumo 31 > 3×10, exige foto y revisión. Actual 230 no es anomalía. Actual 199 bloquea por inconsistencia. |
 | MED-000003 | Seleccionar inaccesible, indicar motivo, no guardar lectura numérica. |
 | MED-000004 | Seleccionar dañado, describir daño y capturar foto. Lectura opcional. |
-| MED-000005 | No consultar antes: activar modo avión, registrar 530, guardar como pending_verification. Al reconectar comprueba 500 y promedio 25. |
+| MED-000005 | No consultar antes: activar modo avión, registrar 530, guardar en SQLite. Al reconectar consulta medidor y verifica 500 y promedio 25 antes de enviar. Si no existe todavía en catastro, envía la visita con valores anteriores null. |
 | MED-000006 | Con el ejemplo de lectura del mes cargado, impedir segunda creación para ese mes. |
 
-No cambies una lectura enviada para repetir pruebas: utiliza otro medidor o período válido y ajusta la fecha previa. Los datos no se importan en la aplicación ni simulan sincronización exitosa.
+No cambies una lectura enviada para repetir pruebas: utiliza otro medidor o período válido y ajusta la fecha previa. Los ejemplos no se importan automáticamente ni simulan una sincronización exitosa.

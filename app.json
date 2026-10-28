@@ -7,7 +7,9 @@
     "icon": "./assets/images/epmaps-icon.png",
     "scheme": "epmaps",
     "userInterfaceStyle": "light",
-    "ios": { "bundleIdentifier": "ec.edu.epmaps.lecturas" },
+    "ios": {
+      "bundleIdentifier": "ec.edu.epmaps.lecturas"
+    },
     "android": {
       "package": "ec.edu.epmaps.lecturas",
       "softwareKeyboardLayoutMode": "resize",
@@ -34,11 +36,24 @@
       "expo-sqlite",
       "expo-secure-store",
       "@react-native-community/datetimepicker",
-      ["expo-image-picker", { "cameraPermission": "EPMAPS necesita la cámara para documentar el medidor y conservar evidencia de la visita.", "microphonePermission": false, "photosPermission": false }]
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "EPMAPS necesita la cámara para documentar el medidor y conservar evidencia de la visita.",
+          "microphonePermission": false,
+          "photosPermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "da542756-a5af-4927-a1fa-9a84a74d242a"
+      }
     }
   }
 }

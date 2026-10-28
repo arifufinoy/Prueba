@@ -11,7 +11,7 @@ export function errorMessage(error: unknown) {
   if (isAxiosError(error)) return error.response ? `MockAPI respondió HTTP ${error.response.status}. Revisa el recurso y sus campos.` : 'No se pudo confirmar la comunicación. Tus datos siguen guardados.';
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
 }
-async function collection<T>(resource: string, params?: Record<string, string>): Promise<T[]> {
+export async function collection<T>(resource: string, params?: Record<string, string>): Promise<T[]> {
   // MockAPI can return 404 for an empty filter. Full collection distinguishes that
   // from a missing resource: never interpret an unavailable resource as empty.
   let data: unknown;
@@ -21,6 +21,7 @@ async function collection<T>(resource: string, params?: Record<string, string>):
     else throw error;
   }
   if (!Array.isArray(data)) throw new Error(`Respuesta inválida en ${resource}; se esperaba una colección.`);
+  if (data.some(row => !row || typeof row !== 'object' || Array.isArray(row))) throw new Error(`Respuesta inválida en ${resource}; hay filas que no son objetos.`);
   return data as T[];
 }
 export async function fetchMeter(code: string): Promise<Meter | null> {
@@ -30,7 +31,16 @@ export async function fetchMeter(code: string): Promise<Meter | null> {
   if (exact.length > 1) throw new Error('Hay varios medidores con el mismo código en MockAPI. Corrige la fuente.');
   const meter = exact[0];
   if (!meter) return null;
-  if (!['direccion','sector','numeroCuenta','estado','fechaUltimaLectura','id'].every(key => typeof meter[key as keyof Meter] === 'string') || !Number.isFinite(meter.ultimaLectura) || meter.ultimaLectura < 0 || !Number.isFinite(meter.consumoPromedioMensual) || meter.consumoPromedioMensual < 0 || Number.isNaN(Date.parse(meter.fechaUltimaLectura))) throw new Error('El medidor remoto tiene campos incompletos o inválidos. Verifica su modelo.');
+  return validateMeter(meter);
+}
+export function validateMeter(meter: Meter): Meter {
+  if (typeof meter.codigo !== 'string' || !validCode(meter.codigo)) throw new Error('El registro remoto tiene un código que no cumple MED-000001. No se usará como referencia válida.');
+  const missing = ['codigo','direccion','sector','numeroCuenta','estado','fechaUltimaLectura','id'].filter(key => typeof meter[key as keyof Meter] !== 'string');
+  for (const key of ['ultimaLectura', 'consumoPromedioMensual'] as const) {
+    if (typeof meter[key] !== 'number' || !Number.isFinite(meter[key]) || meter[key] < 0) missing.push(key);
+  }
+  if (missing.length) throw new Error(`Medidor ${meter.codigo}: revisa los campos de MockAPI: ${missing.join(', ')}. Los nombres y tipos deben coincidir exactamente.`);
+  if (Number.isNaN(Date.parse(meter.fechaUltimaLectura))) throw new Error(`Medidor ${meter.codigo}: fechaUltimaLectura no es una fecha ISO válida.`);
   return meter;
 }
 export const findClient = async (clientId: string) => (await collection<Reading>('/lecturas', { clientId })).filter(r => r.clientId === clientId);
@@ -38,4 +48,3 @@ export const findLogical = async (codigo: string, periodo: string) => {
   if (!validCode(codigo)) throw new Error('Código inválido.');
   return (await collection<Reading>('/lecturas', { codigoMedidor: codigo })).filter(r => r.codigoMedidor === codigo && r.periodo === periodo);
 };
-export const fetchHistory = (employee: string) => collection<Reading>('/lecturas', { codigoEmpleado: employee }).then(rows => rows.filter(r => r.codigoEmpleado === employee));

@@ -10,3 +10,7 @@ CREATE INDEX IF NOT EXISTS queue_status ON readings(status,nextAttempt);
 CREATE TABLE IF NOT EXISTS drafts (employee TEXT PRIMARY KEY NOT NULL, data TEXT NOT NULL);
 PRAGMA user_version = 1;
 `;
+export const migrationV2 = `
+CREATE TABLE IF NOT EXISTS remote_snapshots (resource TEXT PRIMARY KEY NOT NULL, data TEXT NOT NULL);
+PRAGMA user_version = 2;
+`;

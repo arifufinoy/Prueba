@@ -19,10 +19,15 @@ export function Summary({ draft, flush, completed }: { draft: Draft; flush(): Pr
     setBusy(true); setError('');
     try {
       await flush();
-      if (draft.photoUri && !photoExists(draft.photoUri)) throw new Error('La fotografía asociada ya no está disponible. Reemplázala o quítala si es opcional.');
-      const issues = validateDraft({ ...draft, photoUri: photoExists(draft.photoUri) ? draft.photoUri : null });
+      const availablePhoto = draft.photoUri && photoExists(draft.photoUri) ? draft.photoUri : null;
+      const normalized = { ...draft, photoUri: availablePhoto };
+      const issues = validateDraft(normalized);
       if (Object.keys(issues).length) throw new Error(Object.values(issues).join('\n'));
-      const reading = toLocal(draft);
+      const reading = toLocal(normalized);
+      reading.workflow = 'reviewed';
+      // A visit recorded without connectivity remains visibly pending verification,
+      // even when an older meter snapshot is available locally.
+      if (!onlineManager.isOnline()) reading.status = 'pending_verification';
       if (onlineManager.isOnline()) {
         // A failed preflight never destroys a field visit: save locally but block
         // posting until the centralized synchronizer can perform this check.
@@ -42,8 +47,8 @@ export function Summary({ draft, flush, completed }: { draft: Draft; flush(): Pr
     <Card><Text style={s.heading}>{draft.codigoMedidor}</Text><Detail label="Técnico · período" value={`${draft.codigoEmpleado} · ${draft.fechaVisita.slice(0, 7)}`} /><Detail label="Fecha de visita" value={draft.fechaVisita} /><Detail label="Estado observado" value={draft.estadoMedidor} /><Detail label="Lectura actual (m³)" value={currentOf(draft)} /><Detail label="Lectura anterior (m³)" value={check.previous} /><Detail label="Consumo calculado (m³)" value={check.value} />{draft.estadoMedidor === 'inaccesible' && <Detail label="Motivo" value={draft.motivo} />}{draft.estadoMedidor === 'dañado' && <Detail label="Daño" value={draft.danio} />}<Detail label="Revisión de anomalía" value={check.anomalous ? draft.confirmacionAnomalia ? 'Confirmada físicamente' : 'Falta confirmar' : 'No aplica'} /></Card>
     {draft.photoUri && <Image source={{ uri: draft.photoUri }} accessibilityLabel="Evidencia que se guardará" style={{ width: '100%', height: 200, borderRadius: 20 }} resizeMode="contain" />}
     <AnomalyNotice draft={draft} />
-    <Notice>El registro se guardará primero en SQLite. Se enviará automáticamente sólo después de verificar medidor, período y reglas. La fotografía permanece local; no se publica una URL ficticia.</Notice>
+    <Notice>El registro se guardará en SQLite y se enviará automáticamente a MockAPI al tener conexión, incluso si no hay registros previos. Se respetan la unicidad mensual y las validaciones conocidas. Si faltan datos anteriores, se indicará verificación pendiente. La fotografía permanece local.</Notice>
     {error && <Notice danger>{error}</Notice>}
-    <Button title={draft.editing ? 'Guardar cambios' : 'Guardar lectura'} icon="save-outline" loading={busy} onPress={() => { void save(); }} />
+    <Button title="Guardar como Revisado" icon="save-outline" loading={busy} onPress={() => { void save(); }} />
   </>;
 }

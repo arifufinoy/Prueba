@@ -1,10 +1,17 @@
 import type { Draft, LocalReading, Meter } from '../types/domain';
 
 export const validCode = (code: string) => /^MED-\d{6}$/.test(code);
+// R2: no meter data may be requested or displayed without a complete code.
+export const mayShowMeterResults = (code: string) => validCode(code);
 export function localDate(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 export const periodOf = (date: string) => date.slice(0, 7);
+export function duplicateVisitMessage(date: string, existingDate: string) {
+  return date === existingDate
+    ? `Este medidor ya tiene un registro con la fecha ${date}. Selecciona un período distinto.`
+    : `Este medidor ya tiene un registro en ${periodOf(date)} (fecha ${existingDate}). Sólo se permite una lectura por mes.`;
+}
 export const parseLocalDate = (date: string) => new Date(`${date}T12:00:00`);
 export function validVisit(date: string) {
   const parsed = parseLocalDate(date);
@@ -38,7 +45,7 @@ export function validateDraft(d: Draft, step = 5): Record<string, string> {
   return errors;
 }
 export function newDraft(employee: string, clientId: string): Draft {
-  return { clientId, codigoEmpleado: employee, codigoMedidor: '', fechaVisita: localDate(), estadoMedidor: 'normal', lectura: '', motivo: '', danio: '', photoUri: null, confirmacionAnomalia: false, meter: null, step: 1, editing: false };
+  return { clientId, codigoEmpleado: employee, codigoMedidor: '', fechaVisita: localDate(), estadoMedidor: 'normal', lectura: '', motivo: '', danio: '', photoUri: null, confirmacionAnomalia: false, meter: null, step: 1, editing: false, identificationOnly: true };
 }
 export function toLocal(d: Draft): LocalReading {
   const check = consumption(currentOf(d), d.meter);
@@ -50,11 +57,21 @@ export function toLocal(d: Draft): LocalReading {
     motivoInaccesible: d.estadoMedidor === 'inaccesible' ? d.motivo.trim() : null,
     descripcionDanio: d.estadoMedidor === 'dañado' ? d.danio.trim() : null,
     fotoUrl: null, tieneFoto: !!d.photoUri, photoUri: d.photoUri, meter: d.meter,
-    status: d.meter ? 'pending_sync' : 'pending_verification', error: null, attempts: 0, nextAttempt: 0,
+    status: d.meter ? 'pending_sync' : 'pending_verification', verificacionPendiente: !d.meter, error: null, attempts: 0, nextAttempt: 0,
   };
 }
 export function fromLocal(r: LocalReading): Draft {
-  return { clientId: r.clientId, codigoEmpleado: r.codigoEmpleado, codigoMedidor: r.codigoMedidor, fechaVisita: r.fechaVisita, estadoMedidor: r.estadoMedidor, lectura: r.lecturaActual === null ? '' : String(r.lecturaActual), motivo: r.motivoInaccesible ?? '', danio: r.descripcionDanio ?? '', photoUri: r.photoUri, confirmacionAnomalia: r.confirmacionAnomalia, meter: r.meter, step: 3, editing: true };
+  return { clientId: r.clientId, codigoEmpleado: r.codigoEmpleado, codigoMedidor: r.codigoMedidor, fechaVisita: r.fechaVisita, estadoMedidor: r.estadoMedidor ?? 'normal', lectura: r.lecturaActual === null ? '' : String(r.lecturaActual), motivo: r.motivoInaccesible ?? '', danio: r.descripcionDanio ?? '', photoUri: r.photoUri, confirmacionAnomalia: r.confirmacionAnomalia, meter: r.meter, step: 3, editing: true, identificationOnly: false };
+}
+export function toPendingRegistration(d: Draft): LocalReading {
+  return { ...toLocal({ ...d, meter: null, lectura: '', photoUri: null }), workflow: 'pending', estadoMedidor: null, lecturaActual: null, lecturaAnterior: null, consumoCalculado: null, consumoAnomalo: false, confirmacionAnomalia: false, motivoInaccesible: null, descripcionDanio: null, status: 'pending_sync', verificacionPendiente: false };
+}
+export function workflowLabel(r: LocalReading) {
+  if (r.workflow === 'pending') return r.status === 'sent' ? 'Pendiente' : 'En cola';
+  return 'Revisado';
+}
+export function canEditReading(r: LocalReading) {
+  return editable(r.status) || (r.workflow === 'pending' && r.status === 'sent');
 }
 export function remotePayload(r: LocalReading) {
   const { status: _status, photoUri: _photo, meter: _meter, error: _error, attempts: _attempts, nextAttempt: _next, id: _id, ...payload } = r;
